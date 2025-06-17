@@ -1,0 +1,20 @@
+SELECT co.country,  
+COUNT(DISTINCT c.customer_id) AS all_customer_count, 
+COUNT(top_5_customers.customer_id) AS top_customer_count 
+FROM customer c 
+JOIN address a ON c.address_id = a.address_id 
+JOIN city ci ON a.city_id = ci.city_id 
+JOIN country co ON ci.country_id = co.country_id 
+LEFT JOIN ( 
+SELECT customer_id, first_name, last_name, city, country_id, total_paid 
+FROM ( 
+SELECT c.customer_id, c.first_name, c.last_name, ci.city, 
+co.country_id, SUM(p.amount) AS total_paid 
+FROM payment p 
+JOIN customer c ON p.customer_id = c.customer_id 
+JOIN address a ON c.address_id = a.address_id 
+JOIN city ci ON a.city_id = ci.city_id 
+JOIN country co ON ci.country_id = co.country_id 
+WHERE ci.city_id IN ( 
+SELECT city_id FROM ( 
+SELECT ci.city_id 
